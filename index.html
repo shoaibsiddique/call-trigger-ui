@@ -46,11 +46,16 @@
       color: red;
       margin-top: 15px;
     }
+    #statusMessage {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
   <h2>📞 Trigger Outbound Call</h2>
+  <p id="statusMessage">🔄 Checking service status...</p>
 
   <form id="callForm">
     <label for="name">Patient Name:</label>
@@ -96,10 +101,28 @@
   const feedbackForm = document.getElementById("feedbackForm");
   const callResponseMsg = document.getElementById("callResponseMsg");
   const feedbackResponseMsg = document.getElementById("feedbackResponseMsg");
+  const statusMessage = document.getElementById("statusMessage");
 
   let lastName = "";
   let lastDoctor = "";
   let lastTime = "";
+
+  // ✅ Check Service Status on Page Load
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const res = await fetch("https://outbound.techcalculate.com/");
+      const data = await res.json();
+      if (res.ok && data.message) {
+        statusMessage.innerHTML = `✅ ${data.message}`;
+        statusMessage.style.color = "green";
+      } else {
+        throw new Error();
+      }
+    } catch {
+      statusMessage.innerHTML = "❌ Service is Offline";
+      statusMessage.style.color = "red";
+    }
+  });
 
   callForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -125,7 +148,7 @@
     };
 
     try {
-      const res = await fetch("https://cbf1-2001-16a2-ca84-6c00-10e5-151a-38c3-1a7f.ngrok-free.app/trigger-call", {
+      const res = await fetch("https://outbound.techcalculate.com/trigger-call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -138,11 +161,11 @@
         lastName = name;
         lastDoctor = doctor;
         lastTime = time;
-		
-		setTimeout(() => {
-		  <!-- document.getElementById("callForm").reset();-->
-		  callResponseMsg.innerHTML = "";
-		}, 3000);
+
+        setTimeout(() => {
+          callResponseMsg.innerHTML = "";
+          callForm.reset();
+        }, 3000);
       } else {
         callResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
       }
@@ -169,7 +192,7 @@
     };
 
     try {
-      const res = await fetch("https://cbf1-2001-16a2-ca84-6c00-10e5-151a-38c3-1a7f.ngrok-free.app/submit-feedback", {
+      const res = await fetch("https://outbound.techcalculate.com/submit-feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(feedbackPayload)
@@ -180,10 +203,10 @@
       if (res.ok) {
         feedbackResponseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
         document.getElementById("feedback").value = "";
-		setTimeout(() => {
-		  feedbackResponseMsg.innerHTML = "";
-		  document.getElementById("feedback").value = "";
-		}, 3000);
+
+        setTimeout(() => {
+          feedbackResponseMsg.innerHTML = "";
+        }, 3000);
       } else {
         feedbackResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.error || "Feedback failed"}</p>`;
       }
@@ -192,7 +215,6 @@
     }
   });
 </script>
-
 
 </body>
 </html>
