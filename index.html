@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trigger Outbound Call</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f8f9fa;
+    }
+    h2 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 12px 0 4px;
+    }
+    input, select, button {
+      padding: 8px;
+      width: 300px;
+      max-width: 100%;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .success {
+      color: green;
+      margin-top: 20px;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📞 Trigger Outbound Call</h2>
+
+  <form id="callForm">
+    <label for="name">Patient Name:</label>
+    <input type="text" id="name" required />
+
+    <label for="doctor">Doctor Name:</label>
+    <input type="text" id="doctor" required />
+
+    <label for="time">Appointment Time:</label>
+    <select id="time" required>
+      <option value="">-- Select Time --</option>
+      <!-- Times from 1:00 AM to 12:00 PM -->
+      ${[...Array(12).keys()].map(h => 
+        `<option value="${h+1}:00 AM">${h+1}:00 AM</option>`).join('')}
+      ${[...Array(12).keys()].map(h => 
+        `<option value="${h+1}:00 PM">${h+1}:00 PM</option>`).join('')}
+    </select>
+
+    <button type="submit">Send Call</button>
+    <div id="responseMsg"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("callForm");
+    const responseMsg = document.getElementById("responseMsg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById("name").value.trim();
+      const doctor = document.getElementById("doctor").value.trim();
+      const time = document.getElementById("time").value;
+
+      const payload = {
+        token: "ec1a7348-e132-4181-a648-cdebb77c662f",
+        callee_list: [
+          {
+            number: "+966581290885",
+            metadata: {
+              key1: name,
+              key2: doctor,
+              key3: time,
+              key4: "APT-123"
+            }
+          }
+        ]
+      };
+
+      try {
+        const res = await fetch("http://localhost:3000/trigger-call", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          responseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
+        } else {
+          responseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
+        }
+      } catch (err) {
+        responseMsg.innerHTML = `<p class="error">❌ Network Error: ${err.message}</p>`;
+      }
+    });
+  </script>
+
+</body>
+</html>
