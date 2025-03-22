@@ -162,10 +162,10 @@
         lastDoctor = doctor;
         lastTime = time;
 
-        setTimeout(() => {
-          callResponseMsg.innerHTML = "";
-          <!---callForm.reset(); --->
-        }, 3000);
+		setTimeout(() => {
+		  <!-- document.getElementById("callForm").reset();-->
+		  callResponseMsg.innerHTML = "";
+		}, 3000);
       } else {
         callResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
       }
@@ -204,9 +204,10 @@
         feedbackResponseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
         document.getElementById("feedback").value = "";
 
-        setTimeout(() => {
-          feedbackResponseMsg.innerHTML = "";
-        }, 3000);
+		setTimeout(() => {
+		  feedbackResponseMsg.innerHTML = "";
+		  document.getElementById("feedback").value = "";
+		}, 3000);
       } else {
         feedbackResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.error || "Feedback failed"}</p>`;
       }
