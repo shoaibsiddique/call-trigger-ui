@@ -164,7 +164,7 @@
 
         setTimeout(() => {
           callResponseMsg.innerHTML = "";
-          callForm.reset();
+          <!---callForm.reset(); --->
         }, 3000);
       } else {
         callResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
