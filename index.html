@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MAWJ AI Outbound Call Tester V1.0</title>
+  <title>MAWJ AI Outbound Call Tester V0.1</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -54,7 +54,7 @@
 </head>
 <body>
 
-  <h2>📞 MAWJ AI Outbound Call Tester V1.0</h2>
+  <h2>📞 MAWJ AI Outbound Call Tester V0.1</h2>
   <p id="statusMessage">🔄 Checking service status...</p>
 
   <form id="callForm">
@@ -108,19 +108,25 @@
   let lastTime = "";
 
   // ✅ Check Service Status on Page Load
+  // Fetch service status on page load
   window.addEventListener("DOMContentLoaded", async () => {
+    const statusDiv = document.getElementById("statusMessage");
+
     try {
       const res = await fetch("https://outbound.techcalculate.com/");
-      const data = await res.json();
-      if (res.ok && data.message) {
-        statusMessage.innerHTML = `✅ ${data.message}`;
-        statusMessage.style.color = "green";
+      const result = await res.json();
+
+      // Check if response message includes "up and running"
+      if (result.message && result.message.includes("up and running")) {
+        statusDiv.innerHTML = "✅ Service is up and running!";
+        statusDiv.style.color = "green";
       } else {
-        throw new Error();
+        statusDiv.innerHTML = "❌ Service is not responding as expected.";
+        statusDiv.style.color = "red";
       }
-    } catch {
-      statusMessage.innerHTML = "❌ Service is Offline";
-      statusMessage.style.color = "red";
+    } catch (err) {
+      statusDiv.innerHTML = "❌ Failed to fetch service status.";
+      statusDiv.style.color = "red";
     }
   });
 
