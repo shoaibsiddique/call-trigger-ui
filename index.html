@@ -17,13 +17,13 @@
       display: block;
       margin: 12px 0 4px;
     }
-    input, select, button {
+    input, select, textarea, button {
       padding: 8px;
       width: 300px;
       max-width: 100%;
     }
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       background-color: #007bff;
       color: white;
       border: none;
@@ -32,13 +32,19 @@
     button:hover {
       background-color: #0056b3;
     }
+    .secondary {
+      background-color: #28a745;
+    }
+    .secondary:hover {
+      background-color: #1e7e34;
+    }
     .success {
       color: green;
-      margin-top: 20px;
+      margin-top: 15px;
     }
     .error {
       color: red;
-      margin-top: 20px;
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -56,62 +62,137 @@
     <label for="time">Appointment Time:</label>
     <select id="time" required>
       <option value="">-- Select Time --</option>
-      <!-- Times from 1:00 AM to 12:00 PM -->
-      ${[...Array(12).keys()].map(h => 
-        `<option value="${h+1}:00 AM">${h+1}:00 AM</option>`).join('')}
-      ${[...Array(12).keys()].map(h => 
-        `<option value="${h+1}:00 PM">${h+1}:00 PM</option>`).join('')}
+      <script>
+        document.write(
+          [...Array(12).keys()].map(h =>
+            `<option value="${h+1}:00 AM">${h+1}:00 AM</option>`
+          ).join('') +
+          [...Array(12).keys()].map(h =>
+            `<option value="${h+1}:00 PM">${h+1}:00 PM</option>`
+          ).join('')
+        );
+      </script>
     </select>
 
+    <label for="number">Mobile Number (e.g. +966581254778):</label>
+    <input type="tel" id="number" required pattern="^\+\d{8,15}$" />
+
     <button type="submit">Send Call</button>
-    <div id="responseMsg"></div>
+    <div id="callResponseMsg"></div>
   </form>
 
-  <script>
-    const form = document.getElementById("callForm");
-    const responseMsg = document.getElementById("responseMsg");
+  <h2>📝 Submit Feedback</h2>
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const name = document.getElementById("name").value.trim();
-      const doctor = document.getElementById("doctor").value.trim();
-      const time = document.getElementById("time").value;
+  <form id="feedbackForm">
+    <label for="feedback">Feedback:</label>
+    <textarea id="feedback" rows="4" placeholder="Write your feedback here after observing the call responses..." required></textarea>
 
-      const payload = {
-        token: "ec1a7348-e132-4181-a648-cdebb77c662f",
-        callee_list: [
-          {
-            number: "+966581290885",
-            metadata: {
-              key1: name,
-              key2: doctor,
-              key3: time,
-              key4: "APT-123"
-            }
+    <button type="submit" class="secondary">Submit Feedback</button>
+    <div id="feedbackResponseMsg"></div>
+  </form>
+
+<script>
+  const callForm = document.getElementById("callForm");
+  const feedbackForm = document.getElementById("feedbackForm");
+  const callResponseMsg = document.getElementById("callResponseMsg");
+  const feedbackResponseMsg = document.getElementById("feedbackResponseMsg");
+
+  let lastName = "";
+  let lastDoctor = "";
+  let lastTime = "";
+
+  callForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const doctor = document.getElementById("doctor").value.trim();
+    const time = document.getElementById("time").value;
+    const number = document.getElementById("number").value.trim();
+
+    const payload = {
+      token: "ec1a7348-e132-4181-a648-cdebb77c662f",
+      callee_list: [
+        {
+          number: number,
+          metadata: {
+            key1: name,
+            key2: doctor,
+            key3: time,
+            key4: "APT-123"
           }
-        ]
-      };
-
-      try {
-        const res = await fetch("http://localhost:3000/trigger-call", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await res.json();
-
-        if (res.ok) {
-          responseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
-        } else {
-          responseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
         }
-      } catch (err) {
-        responseMsg.innerHTML = `<p class="error">❌ Network Error: ${err.message}</p>`;
+      ]
+    };
+
+    try {
+      const res = await fetch("https://cbf1-2001-16a2-ca84-6c00-10e5-151a-38c3-1a7f.ngrok-free.app/trigger-call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        callResponseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
+        lastName = name;
+        lastDoctor = doctor;
+        lastTime = time;
+		
+		setTimeout(() => {
+		  <!-- document.getElementById("callForm").reset();-->
+		  callResponseMsg.innerHTML = "";
+		}, 3000);
+      } else {
+        callResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.detail || "Unknown error"}</p>`;
       }
-    });
-  </script>
+    } catch (err) {
+      callResponseMsg.innerHTML = `<p class="error">❌ Network Error: ${err.message}</p>`;
+    }
+  });
+
+  feedbackForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const feedbackText = document.getElementById("feedback").value.trim();
+
+    if (!feedbackText || !lastName || !lastDoctor || !lastTime) {
+      feedbackResponseMsg.innerHTML = `<p class="error">❌ Please trigger a call first and enter feedback.</p>`;
+      return;
+    }
+
+    const feedbackPayload = {
+      name: lastName,
+      doctor: lastDoctor,
+      time: lastTime,
+      feedback: feedbackText
+    };
+
+    try {
+      const res = await fetch("https://cbf1-2001-16a2-ca84-6c00-10e5-151a-38c3-1a7f.ngrok-free.app/submit-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(feedbackPayload)
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        feedbackResponseMsg.innerHTML = `<p class="success">✅ ${result.message}</p>`;
+        document.getElementById("feedback").value = "";
+		setTimeout(() => {
+		  feedbackResponseMsg.innerHTML = "";
+		  document.getElementById("feedback").value = "";
+		}, 3000);
+      } else {
+        feedbackResponseMsg.innerHTML = `<p class="error">❌ Error: ${result.error || "Feedback failed"}</p>`;
+      }
+    } catch (err) {
+      feedbackResponseMsg.innerHTML = `<p class="error">❌ Network Error: ${err.message}</p>`;
+    }
+  });
+</script>
+
 
 </body>
 </html>
