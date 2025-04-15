@@ -113,7 +113,8 @@
     const statusDiv = document.getElementById("statusMessage");
 
     try {
-      const res = await fetch("https://outbound.techcalculate.com/");
+      <!--  const res = await fetch("https://outbound.techcalculate.com/"); ––>
+	  const res = await fetch("https://deb5-2001-16a2-cb3d-d500-692e-622b-534a-26e.ngrok-free.app/");
       const result = await res.json();
 
       // Check if response message includes "up and running"
@@ -154,7 +155,8 @@
     };
 
     try {
-      const res = await fetch("https://outbound.techcalculate.com/trigger-call", {
+      <!--const res = await fetch("https://outbound.techcalculate.com/trigger-call", { -->
+	  const res = await fetch("https://deb5-2001-16a2-cb3d-d500-692e-622b-534a-26e.ngrok-free.app/trigger-call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -198,7 +200,9 @@
     };
 
     try {
-      const res = await fetch("https://outbound.techcalculate.com/submit-feedback", {
+     <!-- const res = await fetch("https://outbound.techcalculate.com/submit-feedback", { -->
+	 
+	 const res = await fetch("https://deb5-2001-16a2-cb3d-d500-692e-622b-534a-26e.ngrok-free.app/submit-feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(feedbackPayload)
