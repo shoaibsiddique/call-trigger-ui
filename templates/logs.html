@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Logs Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>🟢 Live Logs Viewer</h2>
+  <pre id="logArea" style="background:#000;color:#0f0;padding:1em;height:80vh;overflow:auto;"></pre>
+
+  <script>
+    const socket = io();
+    const logArea = document.getElementById('logArea');
+    socket.on('log_message', function(msg) {
+      logArea.textContent += msg.data + "\n";
+      logArea.scrollTop = logArea.scrollHeight;
+    });
+  </script>
+</body>
+</html>
