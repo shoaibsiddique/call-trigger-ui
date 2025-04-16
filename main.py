@@ -21,20 +21,21 @@ app.logger.setLevel(logging.INFO)
 
 @app.route("/")
 def home():
-    return render_template("logs.html")
+    return render_template("test.html")
 
 @app.route("/public/mawj/confirm_appointment/<appointment_id>", methods=["GET"])
 def confirm_appointment(appointment_id):
+    app.logger.info("")
     app.logger.info(f"✅ Confirming appointment: {appointment_id}")
     return jsonify({"success": True, "message": f"Appointment {appointment_id} confirmed successfully"})
 
 @app.route("/public/mawj/cancel_appointment/<appointment_id>", methods=["GET"])
 def cancel_appointment(appointment_id):
+    app.logger.info("")
     app.logger.info(f"❌ Cancelling appointment: {appointment_id}")
     return jsonify({"success": True, "message": f"Appointment {appointment_id} cancelled successfully"})
 
 if __name__ == "__main__":
     import os
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5005))
     socketio.run(app, host="0.0.0.0", port=port)
-
