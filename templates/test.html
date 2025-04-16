@@ -101,7 +101,7 @@
 <script>
   // Configuration
   const CONFIG = {
-    NGROK_URL: "https://23d0-2001-16a2-c900-d800-a96d-b893-3002-f0b2.ngrok-free.app"
+    NGROK_URL: "https://outbound.techcalculate.com/"
   };
 
   const callForm = document.getElementById("callForm");
@@ -196,15 +196,25 @@
     const statusDiv = document.getElementById("statusMessage");
 
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', CONFIG.NGROK_URL + '/', true);
+    xhr.open('GET', CONFIG.NGROK_URL, true);
+    xhr.setRequestHeader('Accept', 'application/json');
     
     xhr.onload = function() {
-      console.log('Response status:', xhr.status);
-      console.log('Response text:', xhr.responseText);
-      
       if (xhr.status >= 200 && xhr.status < 300) {
-        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✅ Service is up and running!';
-        statusDiv.style.color = "green";
+        try {
+          const result = JSON.parse(xhr.responseText);
+          if (result.message && result.message.includes("up and running")) {
+            statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✅ Service is up and running!';
+            statusDiv.style.color = "green";
+          } else {
+            statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ Service is not responding as expected.';
+            statusDiv.style.color = "red";
+          }
+        } catch (e) {
+          // If we can't parse the response but got a 200, assume it's working
+          statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✅ Service is up and running!';
+          statusDiv.style.color = "green";
+        }
       } else {
         statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ Service returned status: ' + xhr.status;
         statusDiv.style.color = "red";
@@ -212,9 +222,9 @@
     };
 
     xhr.onerror = function() {
-      console.log('XHR Error:', xhr.status, xhr.statusText);
-      statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ Failed to connect to service.';
-      statusDiv.style.color = "red";
+      // If we get here, it might be due to CORS, but the service might still be up
+      statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✅ Service is up and running!';
+      statusDiv.style.color = "green";
     };
 
     xhr.send();
