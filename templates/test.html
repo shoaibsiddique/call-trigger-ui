@@ -101,7 +101,7 @@
 <script>
   // Configuration
   const CONFIG = {
-    NGROK_URL: "https://outbound.techcalculate.com/"
+    NGROK_URL: "https://outbound.techcalculate.com"
   };
 
   const callForm = document.getElementById("callForm");
@@ -164,7 +164,7 @@
     };
 
     try {
-        const response = await fetch(CONFIG.NGROK_URL + "/myo_outbound", {
+        const response = await fetch(CONFIG.NGROK_URL + '/myo_outbound', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -196,7 +196,7 @@
     const statusDiv = document.getElementById("statusMessage");
 
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', CONFIG.NGROK_URL, true);
+    xhr.open('GET', CONFIG.NGROK_URL + '/', true);
     xhr.setRequestHeader('Accept', 'application/json');
     
     xhr.onload = function() {
